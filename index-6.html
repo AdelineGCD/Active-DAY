@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>active day</title>
+  <style>
+    :root{
+      --bg:#f7f2ec;
+      --panel:#ffffff;
+      --panel-soft:#fffaf6;
+      --ink:#3d554e;
+      --muted:#71817b;
+      --line:#dfeae4;
+      --primary:#5CA99A;
+      --primary-dark:#478c80;
+      --primary-soft:#D8EDE4;
+      --coral:#FFA47F;
+      --danger:#c75d55;
+      --shadow:0 12px 28px rgba(61,85,78,.12);
+      --card-shadow:0 8px 18px rgba(20,32,28,.08);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+    body{min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    input,select,textarea{
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:#fff;
+      color:var(--ink);
+    }
+    textarea{min-height:120px;resize:vertical}
+    label{display:block;font-size:14px;font-weight:700;margin-bottom:7px}
+    .app{display:flex;min-height:100vh}
+    .sidebar{
+      width:270px;
+      padding:24px 18px 18px;
+      background:linear-gradient(180deg, var(--primary-soft), #edf8f5);
+      border-right:1px solid var(--line);
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow-y:auto;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:29px;
+      font-weight:800;
+      margin:0 8px 30px;
+      letter-spacing:-.04em;
+    }
+    .brand-logo{width:42px;height:42px;flex:0 0 42px}
+    .brand > span > span{color:var(--coral)}
+    .primary-btn,.button{
+      border:0;border-radius:999px;padding:11px 17px;
+      background:var(--primary);color:#fff;font-weight:700;
+      transition:.2s ease;
+    }
+    .primary-btn:hover,.button:hover{filter:brightness(.98); transform:translateY(-1px)}
+    .button.secondary{background:var(--primary-soft);color:var(--ink)}
+    .button.accent{background:var(--coral)}
+    .button.danger{background:var(--danger)}
+    .button.small{padding:7px 11px;font-size:13px}
+    .sidebar .primary-btn{width:100%;margin-bottom:18px}
+    .sidebar h3{
+      font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#6c8b81;
+      margin:18px 10px 8px;font-weight:800;
+    }
+    .calendar-menu{display:flex;flex-direction:column;gap:6px}
+    .calendar-item{
+      display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:12px;
+      background:rgba(255,255,255,.2);border:1px solid transparent;transition:.2s ease;
+    }
+    .calendar-item.active{background:#fff;border-color:var(--line);font-weight:700}
+    .calendar-item:hover{background:#fff}
+    .calendar-item .calendar-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .calendar-item input{width:auto;accent-color:var(--primary)}
+    .content{flex:1;min-width:0;padding:28px 26px 40px}
+    .topbar{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:18px;
+      margin-bottom:18px;
+    }
+    .topbar h1{font-size:32px;margin:0 0 6px;letter-spacing:-.04em}
+    .subtitle{margin:0;color:var(--muted)}
+    .tabs{
+      display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);margin-bottom:22px;padding-left:2px;
+    }
+    .tab{
+      border:0;background:transparent;color:var(--muted);padding:11px 16px;
+      border-bottom:3px solid transparent;font-weight:700;border-radius:10px 10px 0 0;
+    }
+    .tab.active{
+      color:var(--primary);border-color:var(--primary);background:rgba(92,169,154,.06)
+    }
+    .view{display:none}
+    .view.active{display:block}
+    .panel{
+      background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:22px;margin-bottom:18px;
+    }
+    h2{margin:0 0 14px;font-size:24px;letter-spacing:-.03em}
+    h3{margin:18px 0 12px;font-size:18px}
+    .notice{
+      background:var(--primary-soft);padding:13px 15px;border-radius:12px;
+      color:var(--ink);margin-bottom:18px;font-weight:600;
+    }
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+    .span-5{grid-column:span 5}.span-7{grid-column:span 7}
+    .form-group{margin-bottom:14px}
+    .form-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .planning-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .days{display:flex;flex-wrap:wrap;gap:8px}
+    .day-option{
+      display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--line);
+      border-radius:999px;background:#fff;font-size:13px;
+    }
+    .day-option input{width:auto;accent-color:var(--primary)}
+    .cards-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+    .card-item{
+      border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff;box-shadow:var(--card-shadow)
+    }
+    .card-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .card-header h3{margin:0;font-size:18px}
+    .card-color-dot{width:18px;height:18px;border-radius:50%;display:inline-block}
+    .field-list{margin:12px 0}
+    .field-value{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #edf3ef;font-size:14px}
+    .field-value strong{font-weight:700}
+    .empty{text-align:center;color:var(--muted);padding:22px;border:1px dashed #ceded7;border-radius:12px;background:#f9fbfa}
+    .calendar-board{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:12px;overflow-x:auto;padding-bottom:4px}
+    .day-column{min-width:170px;min-height:250px;padding:10px;background:linear-gradient(180deg,#fcfdfc,#f7fbf8);border:1px solid var(--line);border-radius:16px}
+    .day-header{text-align:center;color:var(--primary);font-weight:800;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--line)}
+    .entry{border-radius:14px;padding:12px;color:#fff;box-shadow:var(--card-shadow);margin-bottom:10px}
+    .entry.activity-entry{background:linear-gradient(135deg,var(--primary),var(--primary-dark));}
+    .entry.event-entry{background:linear-gradient(135deg,var(--coral),#f0a26f);}
+    .entry .label{display:inline-block;background:rgba(255,255,255,.18);padding:4px 7px;border-radius:999px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px}
+    .entry strong{display:block;font-size:16px;line-height:1.3;margin-bottom:6px}
+    .entry small,.entry-meta{display:block;font-size:12px;opacity:.96;line-height:1.5}
+    .entry-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .entry-actions button{border:0;padding:5px 9px;border-radius:8px;background:rgba(255,255,255,.22);color:#fff;font-weight:700;font-size:12px}
+    .combined-label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.9;margin-bottom:6px}
+    .selection-panel{margin-top:22px;background:var(--panel-soft);border:1px solid #f5d7c8;border-radius:16px;padding:16px}
+    .selection-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .selection-option{display:flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:14px}
+    .selection-option input{width:auto;accent-color:var(--primary)}
+    .toast{position:fixed;right:20px;bottom:20px;display:none;padding:13px 18px;border-radius:12px;background:var(--ink);color:#fff;box-shadow:var(--shadow);z-index:1200}
+
+    .hero{background:linear-gradient(135deg,#ffffff,#f7fbf8);padding:28px}
+    .hero-brand{display:flex;align-items:center;gap:12px;font-size:34px;font-weight:900;letter-spacing:-.05em;margin-bottom:12px}
+    .hero-logo{width:52px;height:52px}
+    .hero-brand > span > span{color:var(--coral)}
+    .hero h2{font-size:38px;margin:0 0 10px}
+    .hero p{font-size:18px;color:var(--muted);margin:0 0 20px;line-height:1.6}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+    .mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+    .feature{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff;min-height:140px}
+    .feature strong{display:block;margin-bottom:8px;font-size:16px}
+    .feature p{margin:0;color:var(--muted);line-height:1.55}
+
+    .modal{position:fixed;inset:0;background:rgba(24,32,31,.38);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
+    .modal.hidden{display:none}
+    .modal-card{width:min(560px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:22px}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .close-btn{border:0;background:transparent;font-size:24px;color:var(--muted);cursor:pointer}
+    .modal-form .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-form .form-group{margin-bottom:14px}
+    .theme-list{display:flex;flex-wrap:wrap;gap:12px}
+    .theme-swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:0 0 0 2px #fff,0 2px 8px rgba(61,85,78,.2);transition:.2s ease}
+    .theme-swatch:hover{transform:scale(1.12)}
+    .theme-swatch.active{border-color:var(--ink);transform:scale(1.12)}
+    .step-list{display:grid;gap:14px;margin-top:16px}
+    .step-card{display:flex;gap:14px;padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,#ffffff,#f6fbf8)}
+    .step-index{width:42px;height:42px;border-radius:50%;background:var(--primary-soft);display:grid;place-items:center;font-weight:800;color:var(--primary)}
+    .step-card h4{margin:0 0 6px;font-size:18px}
+    .step-card p{margin:0;color:var(--muted);line-height:1.5}
+    .criteria-row{display:grid;grid-template-columns:1.2fr 0.7fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px}
+    .criteria-row .form-group{margin:0}
+    .footer-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+    .ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+    .tiny{padding:6px 10px;font-size:12px;border-radius:999px}
+    .color-picker{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0}
+    .color-choice{width:32px;height:32px;padding:0;border:3px solid transparent;border-radius:50%;cursor:pointer;box-shadow:0 0 0 2px #fff,0 2px 7px rgba(61,85,78,.2);transition:.2s ease}
+    .color-choice:hover{transform:scale(1.12)}
+    .color-choice.active{border-color:var(--ink);transform:scale(1.12)}
+    .tutorial-progress{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+    .dot{width:10px;height:10px;border-radius:50%;background:#dfeae4}
+    .dot.active{background:var(--primary)}
+    .tutorial-content{padding:12px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,#fdfefe,#f6faf7);margin-bottom:14px}
+    .tutorial-content h3{margin:0 0 10px;font-size:22px}
+    .tutorial-content p{font-size:16px;line-height:1.6;color:var(--muted);margin:0}
+    @media (max-width:1000px){
+      .sidebar{width:230px}
+      .span-5,.span-7{grid-column:span 12}
+      .planning-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid{grid-template-columns:1fr}
+      .mini-grid{grid-template-columns:1fr}
+    }
+    @media (max-width:760px){
+      .app{display:block}
+      .sidebar{position:relative;top:auto;height:auto;width:100%;border-right:none;border-bottom:1px solid var(--line)}
+      .content{padding:18px 14px 30px}
+      .topbar{flex-direction:column;align-items:flex-start}
+      .tabs{gap:6px}
+      .tab{padding:10px 12px;font-size:14px}
+      .calendar-board{grid-template-columns:1fr}
+      .day-column{min-width:100%}
+      .planning-controls{grid-template-columns:1fr}
+      .criteria-row{grid-template-columns:1fr}
+      .modal-card{padding:18px}
+      .modal-form .two-col{grid-template-columns:1fr}
+      .hero h2{font-size:30px}
+      .hero-brand{font-size:28px}
+      .selection-list{flex-direction:column;align-items:stretch}
+      .selection-option{width:100%}
+      .calendar-item{padding:9px 8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg class="brand-logo" viewBox="0 0 64 64" aria-label="Logo active day">
+          <circle cx="32" cy="32" r="29" fill="var(--coral)"/>
+          <path d="M19 35c5-10 10-15 17-15 5 0 9 3 11 8" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="23" cy="42" r="4" fill="#fff"/>
+          <circle cx="42" cy="19" r="4" fill="#fff"/>
+        </svg>
+        <span>active<span>day</span></span>
+      </div>
+
+      <button class="primary-btn" type="button" onclick="createCalendar(); showView('planning', document.querySelector('[data-view=\'planning\']'))">+ Nouveau calendrier</button>
+      <h3>Mes calendriers</h3>
+      <div id="calendarMenu" class="calendar-menu"></div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">active day</h1>
+          <p class="subtitle">Votre journée, à votre façon.</p>
+        </div>
+        <button class="button secondary" onclick="resetApplication()">Réinitialiser</button>
+      </header>
+
+      <nav class="tabs">
+        <button class="tab active" data-view="home" onclick="showView('home',this)">Accueil</button>
+        <button class="tab" data-view="planning" onclick="showView('planning',this)">Planning</button>
+        <button class="tab" data-view="cards" onclick="showView('cards',this)">Mes cartes</button>
+        <button class="tab" data-view="tuto" onclick="showView('tuto',this)">Tuto</button>
+        <button class="tab" data-view="settings" onclick="showView('settings',this)">Paramètres</button>
+      </nav>
+
+      <section id="home" class="view active">
+        <div class="panel hero">
+          <div class="hero-brand">
+            <svg class="hero-logo" viewBox="0 0 64 64" aria-label="Logo active day">
+              <circle cx="32" cy="32" r="29" fill="var(--coral)"/>
+              <path d="M19 35c5-10 10-15 17-15 5 0 9 3 11 8" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="23" cy="42" r="4" fill="#fff"/>
+              <circle cx="42" cy="19" r="4" fill="#fff"/>
+            </svg>
+            <span>active<span>day</span></span>
+          </div>
+          <h2>Votre journée, à votre façon</h2>
+          <p>Crée tes activités, personnalise tes cartes et génère un planning adapté à tes envies.</p>
+          <div class="hero-actions">
+            <button class="button accent" type="button" onclick="createCalendar(); showView('planning', document.querySelector('[data-view=\'planning\']'))">Créer mon premier calendrier</button>
+            <button class="button secondary" type="button" onclick="openTutorial(true)">Découvrir comment ça marche</button>
+          </div>
+          <div class="mini-grid">
+            <div class="feature">
+              <strong>Créer</strong>
+              <p>Crée tes calendriers et organise ton espace selon tes priorités.</p>
+            </div>
+            <div class="feature">
+              <strong>Personnaliser</strong>
+              <p>Construis tes cartes avec les critères qui comptent pour toi.</p>
+            </div>
+            <div class="feature">
+              <strong>Planifier</strong>
+              <p>Écris ta requête, génère une semaine et ajuste le résultat.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="planning" class="view">
+        <div id="generator" class="panel">
+          <h2>Générer un planning</h2>
+          <div class="notice">Les cartes et les calendriers sélectionnés servent à construire le planning.</div>
+
+          <div class="form-group">
+            <label for="planningRequest">Décris ton planning</label>
+            <textarea id="planningRequest" placeholder="Explique ce que tu veux organiser, tes contraintes ou tes envies..."></textarea>
+          </div>
+
+          <div class="planning-controls">
+            <div class="form-group">
+              <label for="activityCount">Activités par jour</label>
+              <select id="activityCount">
+                <option value="1">1 activité</option>
+                <option value="2">2 activités</option>
+                <option value="3">3 activités</option>
+                <option value="variable">Variable selon mes cartes</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="dailyTime">Temps disponible par jour</label>
+              <select id="dailyTime">
+                <option value="auto">Déterminé par les cartes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">1 heure</option>
+                <option value="120">2 heures</option>
+                <option value="custom">Durée personnalisée</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="customTime">Durée personnalisée (min)</label>
+              <input id="customTime" type="number" value="90" min="1" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:14px">
+            <label>Jours disponibles</label>
+            <div id="availableDays" class="days"></div>
+          </div>
+
+          <div class="form-actions">
+            <button class="button" type="button" onclick="generatePlanning()">Générer le planning</button>
+            <button class="button secondary" type="button" onclick="clearPlanning()">Effacer le planning</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+            <h2 id="planningTitle">Planning de la semaine</h2>
+            <span id="planningStatus" class="subtitle"></span>
+          </div>
+
+          <div id="calendarBoard" class="calendar-board"></div>
+
+          <div class="selection-panel">
+            <strong>Mes calendriers</strong>
+            <p class="subtitle">Coche les plannings à afficher ensemble sur cette page.</p>
+            <div id="planningSelection" class="selection-list"></div>
+            <div class="form-actions">
+              <button class="button" type="button" onclick="showSelectedCalendars()">Afficher la sélection</button>
+              <button class="button secondary" type="button" onclick="showSingleCalendar()">Afficher uniquement le calendrier actif</button>
+            </div>
+          </div>
+
+          <div class="form-actions" style="margin-top:20px">
+            <button class="button accent" type="button" onclick="openEventModal()">+ Ajouter un événement</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="cards" class="view">
+        <div class="grid">
+          <div class="panel span-5">
+            <h2 id="cardFormTitle">Créer une carte</h2>
+            <form onsubmit="saveCard(event)">
+              <input type="hidden" id="editingCardId" />
+              <div class="form-group">
+                <label for="cardName">Nom de la carte</label>
+                <input id="cardName" required />
+              </div>
+              <div class="form-group">
+                <label for="cardDescription">Description</label>
+                <textarea id="cardDescription"></textarea>
+              </div>
+
+              <h3>Critères</h3>
+              <div id="criteriaContainer"></div>
+
+              <div class="form-group">
+                <label>Couleur de la carte</label>
+                <div id="cardColor" class="color-picker" aria-label="Couleur de la carte"></div>
+                <input type="hidden" id="selectedCardColor" value="#5CA99A" />
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="button secondary" onclick="addCriterion()">+ Ajouter</button>
+                <button type="submit" class="button">Enregistrer</button>
+                <button type="button" class="button secondary" onclick="resetCardForm()">Annuler</button>
+              </div>
+            </form>
+          </div>
+          <div class="panel span-7">
+            <h2>Mes cartes</h2>
+            <div id="cardsList" class="cards-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tuto" class="view">
+        <div class="panel">
+          <h2>COMMENT UTILISER ACTIVE DAY ?</h2>
+          <div class="step-list">
+            <div class="step-card">
+              <div class="step-index">01</div>
+              <div>
+                <h4>Créer un calendrier</h4>
+                <p>Commence par créer un calendrier pour organiser un thème ou une période précise.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-index">02</div>
+              <div>
+                <h4>Créer ses cartes</h4>
+                <p>Crée tes propres cartes et choisis les critères qui correspondent à tes activités.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-index">03</div>
+              <div>
+                <h4>Écrire une requête</h4>
+                <p>Décris librement ce que tu souhaites obtenir dans ton planning.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-index">04</div>
+              <div>
+                <h4>Générer son planning</h4>
+                <p>Active day construit une semaine à partir de tes cartes et de ta demande.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-index">05</div>
+              <div>
+                <h4>Modifier son planning</h4>
+                <p>Tu peux déplacer, remplacer ou ajuster les activités pour les faire correspondre à ton rythme.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-index">06</div>
+              <div>
+                <h4>Ajouter des événements</h4>
+                <p>Ajoute des rendez-vous ou des éléments ponctuels directement dans le calendrier.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="button" type="button" onclick="openTutorial(true)">Relire le tutoriel</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="settings" class="view">
+        <div class="panel">
+          <h2>Paramètres</h2>
+          <div class="form-group">
+            <label for="calendarName">Nom du calendrier actif</label>
+            <input id="calendarName" />
+          </div>
+          <div class="form-actions">
+            <button class="button" type="button" onclick="renameCalendar()">Renommer</button>
+            <button class="button secondary" type="button" onclick="duplicateCalendar()">Dupliquer</button>
+            <button class="button danger" type="button" onclick="deleteCalendar()">Supprimer</button>
+          </div>
+
+          <div class="form-group" style="margin-top:24px">
+            <label>Palette de l'interface</label>
+            <div id="themeSelector" class="theme-list"></div>
+          </div>
+
+          <div class="form-actions">
+            <button class="button secondary" type="button" onclick="openTutorial(true)">Ouvrir le tutoriel</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="eventModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 style="margin:0">Ajouter un événement</h2>
+        <button class="close-btn" type="button" aria-label="Fermer" onclick="closeEventModal()">×</button>
+      </div>
+
+      <form class="modal-form" onsubmit="saveEvent(event)">
+        <div class="form-group">
+          <label for="eventTitle">Titre</label>
+          <input id="eventTitle" placeholder="Rendez-vous médecin" required />
+        </div>
+
+        <div class="form-group">
+          <label for="eventDescription">Description</label>
+          <textarea id="eventDescription" placeholder="Apporter les documents administratifs"></textarea>
+        </div>
+
+        <div class="two-col">
+          <div class="form-group">
+            <label for="eventDay">Jour</label>
+            <select id="eventDay">
+              <option>Lundi</option>
+              <option>Mardi</option>
+              <option>Mercredi</option>
+              <option>Jeudi</option>
+              <option>Vendredi</option>
+              <option>Samedi</option>
+              <option>Dimanche</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="eventTime">Heure</label>
+            <input id="eventTime" type="time" value="14:30" required />
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="form-group">
+            <label for="eventDuration">Durée (minutes)</label>
+            <input id="eventDuration" type="number" min="15" step="15" value="60" required />
+          </div>
+
+          <div class="form-group">
+            <label for="eventColor">Couleur de l'étiquette</label>
+            <select id="eventColor"></select>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button type="button" class="button secondary" onclick="closeEventModal()">Annuler</button>
+          <button type="submit" class="button">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="tutorialModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="tutorialTitle" style="margin:0">Bienvenue</h2>
+        <button class="close-btn" type="button" aria-label="Fermer" onclick="closeTutorial()">×</button>
+      </div>
+
+      <div class="tutorial-progress" id="tutorialProgress"></div>
+
+      <div class="tutorial-content">
+        <h3 id="tutorialStepTitle">active day</h3>
+        <p id="tutorialText"></p>
+      </div>
+
+      <div class="footer-actions">
+        <button class="button secondary" id="tutorialPrev" type="button" onclick="changeTutorialStep(-1)">Précédent</button>
+        <button class="button secondary" id="tutorialSkip" type="button" onclick="closeTutorial()">Passer le tutoriel</button>
+        <button class="button" id="tutorialNext" type="button" onclick="changeTutorialStep(1)">Suivant</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'active-day-planner-v2';
+    const DAYS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+    const CARD_COLORS = [
+      ['Sauge','#5CA99A'],['Corail','#FFA47F'],['Bleu pastel','#7DA7D9'],['Prune','#B885B8'],['Jaune doux','#E7C76D'],['Rose','#EC9AA0'],['Menthe','#8BC7AE'],
+      ['Bleu nuit','#536A9C'],['Lavande','#A99BE8'],['Pêche','#F5B48C'],['Terracotta','#D9785E'],['Vert forêt','#477C68'],['Ciel','#8DC9DF'],['Lilas','#C59CD6'],['Sable','#D8B98B'],['Rouge doux','#D66D75']
+    ];
+    const EVENT_COLORS = [
+      ['Orange','#F29A6A'],['Corail','#FFA47F'],['Bleu','#7DA7D9'],['Rose','#EC9AA0'],['Vert','#8BC7AE'],['Violet','#B885B8'],['Rouge','#D66D75'],['Sable','#D8B98B']
+    ];
+    const THEMES = {
+      sage:{primary:'#5CA99A',primaryDark:'#478C80',primarySoft:'#D8EDE4',coral:'#FFA47F',bg:'#F7F2EC'},
+      coral:{primary:'#E28B67',primaryDark:'#C86D4B',primarySoft:'#FDE1D5',coral:'#FF8E7F',bg:'#FFF5EF'},
+      blue:{primary:'#6A86C8',primaryDark:'#4A68A8',primarySoft:'#DDE6FF',coral:'#F4A57A',bg:'#F3F6FC'},
+      plum:{primary:'#9A6EB4',primaryDark:'#7B5097',primarySoft:'#F1E5FF',coral:'#F7B27C',bg:'#FAF5FC'},
+      ocean:{primary:'#3989A5',primaryDark:'#276A83',primarySoft:'#D9F0F7',coral:'#F39C7A',bg:'#F1F8FA'},
+      forest:{primary:'#5E936C',primaryDark:'#3F7350',primarySoft:'#DFEFE1',coral:'#E9A36B',bg:'#F3F8F1'},
+      sunset:{primary:'#C97961',primaryDark:'#A95744',primarySoft:'#F8DDD4',coral:'#E9A657',bg:'#FFF6EC'},
+      lavender:{primary:'#8878C7',primaryDark:'#6755A5',primarySoft:'#E9E4FA',coral:'#E39AAB',bg:'#F8F6FD'}
+    };
+
+    const uid = () => `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+
+    const escapeHtml = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+    function buildInitialState(){
+      const calendarId = uid();
+      return {
+        settings:{theme:'sage', tutorialCompleted:false},
+        currentCalendarId:calendarId,
+        selectedCalendarIds:[calendarId],
+        ui:{combinedView:false},
+        calendars:[{
+          id:calendarId,
+          name:'Mon calendrier',
+          cards:[
+            {id: uid(), name:'Cardio', description:'Séance dynamique', color:'#FFA47F', fields:[{key:'Durée', value:'40', type:'number'},{key:'Intensité', value:'Moyenne', type:'select'}]},
+            {id: uid(), name:'Yoga', description:'Séance douce', color:'#8BC7AE', fields:[{key:'Durée', value:'30', type:'number'},{key:'Intensité', value:'Faible', type:'select'}]}
+          ],
+          planning:[],
+          events:[],
+          request:''
+        }]
+      };
+    }
+
+    function loadState(){
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!raw) return buildInitialState();
+        const base = buildInitialState();
+        const merged = {
+          ...base,
+          ...raw,
+          settings:{...base.settings, ...(raw.settings||{})},
+          ui:{...base.ui, ...(raw.ui||{})}
+        };
+        if (!merged.calendars || !merged.calendars.length) merged.calendars = base.calendars;
+        if (!merged.currentCalendarId) merged.currentCalendarId = merged.calendars[0].id;
+        if (!merged.selectedCalendarIds || !merged.selectedCalendarIds.length) merged.selectedCalendarIds = [merged.currentCalendarId];
+        return merged;
+      } catch (error) {
+        return buildInitialState();
+      }
+    }
+
+    let state = loadState();
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function currentCalendar(){
+      return state.calendars.find(c => c.id === state.currentCalendarId) || state.calendars[0];
+    }
+
+    function findCalendarById(id){
+      return state.calendars.find(c => c.id === id);
+    }
+
+    function value(card,key){
+      if (!card || !card.fields) return '';
+      const found = card.fields.find(f => (f.key || '').toLowerCase() === String(key).toLowerCase());
+      return found ? found.value : '';
+    }
+
+    function notify(message){
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.style.display = 'block';
+      clearTimeout(notify.timer);
+      notify.timer = setTimeout(() => { el.style.display='none'; }, 2200);
+    }
+
+    function applyTheme(){
+      const theme = THEMES[state.settings.theme] || THEMES.sage;
+      document.documentElement.style.setProperty('--primary', theme.primary);
+      document.documentElement.style.setProperty('--primary-dark', theme.primaryDark);
+      document.documentElement.style.setProperty('--primary-soft', theme.primarySoft);
+      document.documentElement.style.setProperty('--coral', theme.coral);
+      document.documentElement.style.setProperty('--bg', theme.bg);
+      renderThemeSelector();
+    }
+
+    function showView(viewName, tabButton){
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const view = document.getElementById(viewName);
+      if (view) view.classList.add('active');
+      if (tabButton) tabButton.classList.add('active');
+    }
+
+    function renderMenu(){
+      const menu = document.getElementById('calendarMenu');
+      menu.innerHTML = state.calendars.map(calendar => {
+        const isActive = calendar.id === state.currentCalendarId;
+        const isSelected = state.selectedCalendarIds.includes(calendar.id);
+        return `
+          <div class="calendar-item ${isActive ? 'active' : ''}" onclick="selectCalendar('${calendar.id}')">
+            <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggleCalendar('${calendar.id}', this.checked)" />
+            <span class="calendar-name">${escapeHtml(calendar.name)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSelection(){
+      const container = document.getElementById('planningSelection');
+      container.innerHTML = state.calendars.map(calendar => `
+        <label class="selection-option">
+          <input type="checkbox" ${state.selectedCalendarIds.includes(calendar.id) ? 'checked' : ''} onchange="toggleCalendar('${calendar.id}', this.checked)" />
+          ${escapeHtml(calendar.name)}
+        </label>
+      `).join('');
+    }
+
+    function selectCalendar(calendarId){
+      if (!findCalendarById(calendarId)) return;
+      state.currentCalendarId = calendarId;
+      state.ui.combinedView = false;
+      saveState();
+      render();
+      showView('planning', document.querySelector('[data-view="planning"]'));
+    }
+
+    function toggleCalendar(calendarId, checked){
+      if (checked && !state.selectedCalendarIds.includes(calendarId)) state.selectedCalendarIds.push(calendarId);
+      if (!checked) state.selectedCalendarIds = state.selectedCalendarIds.filter(id => id !== calendarId);
+      if (!state.selectedCalendarIds.length) state.selectedCalendarIds = [state.currentCalendarId];
+      if (!state.selectedCalendarIds.includes(state.currentCalendarId)) state.currentCalendarId = state.selectedCalendarIds[0];
+      saveState();
+      render();
+    }
+
+    function renderDays(){
+      const target = document.getElementById('availableDays');
+      target.innerHTML = DAYS.map(day => `
+        <label class="day-option">
+          <input type="checkbox" value="${day}" checked />
+          ${day}
+        </label>
+      `).join('');
+    }
+
+    function renderThemeSelector(){
+      const container = document.getElementById('themeSelector');
+      if (!container) return;
+      container.innerHTML = Object.entries(THEMES).map(([key, theme]) => `
+        <button type="button" class="theme-swatch ${state.settings.theme === key ? 'active' : ''}" title="${key}" aria-label="Thème ${key}" style="background:linear-gradient(135deg,${theme.primary},${theme.coral})" onclick="setTheme('${key}')"></button>
+      `).join('');
+    }
+
+    function setTheme(themeKey){
+      state.settings.theme = themeKey;
+      applyTheme();
+      saveState();
+      notify('Palette mise à jour');
+    }
+
+    function addCriterion(defaultValue = {}){
+      const wrap = document.createElement('div');
+      wrap.className = 'criteria-row';
+      wrap.innerHTML = `
+        <div class="form-group">
+          <label>Critère</label>
+          <input class="criterion-key" value="${escapeHtml(defaultValue.key || '')}" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select class="criterion-type">
+            <option value="text">text</option>
+            <option value="number">number</option>
+            <option value="select">select</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valeur</label>
+          <input class="criterion-value" value="${escapeHtml(defaultValue.value || '')}" />
+        </div>
+        <button type="button" class="button danger small" onclick="this.parentElement.remove()">Supprimer</button>
+      `;
+      wrap.querySelector('.criterion-type').value = defaultValue.type || 'text';
+      document.getElementById('criteriaContainer').appendChild(wrap);
+    }
+
+    function resetCardForm(){
+      document.getElementById('editingCardId').value = '';
+      document.getElementById('cardName').value = '';
+      document.getElementById('cardDescription').value = '';
+      document.getElementById('criteriaContainer').innerHTML = '';
+      addCriterion({key:'Durée', type:'number', value:'30'});
+      addCriterion({key:'Intensité', type:'select', value:'Moyenne'});
+      populateCardColors('#5CA99A');
+    }
+
+    function populateCardColors(selected = '#5CA99A'){
+      const container = document.getElementById('cardColor');
+      const hiddenInput = document.getElementById('selectedCardColor');
+      if (!container || !hiddenInput) return;
+      hiddenInput.value = selected;
+      container.innerHTML = CARD_COLORS.map(([name, color]) => `
+        <button type="button" class="color-choice ${color === selected ? 'active' : ''}" title="${name}" aria-label="${name}" style="background:${color}" onclick="selectCardColor('${color}')"></button>
+      `).join('');
+    }
+
+    function selectCardColor(color){
+      const hiddenInput = document.getElementById('selectedCardColor');
+      if (hiddenInput) hiddenInput.value = color;
+      document.querySelectorAll('.color-choice').forEach(button => {
+        const selected = normalizeColor(button.style.backgroundColor || '#FFFFFF') === normalizeColor(color);
+        button.classList.toggle('active', selected);
+      });
+    }
+
+    function normalizeColor(color){
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = color;
+      return ctx.fillStyle.toLowerCase();
+    }
+
+    function renderCards(){
+      const list = document.getElementById('cardsList');
+      const calendar = currentCalendar();
+      if (!calendar) return;
+      if (!calendar.cards || !calendar.cards.length) {
+        list.innerHTML = '<div class="empty">Aucune carte pour le moment.</div>';
+        return;
+      }
+      list.innerHTML = calendar.cards.map(card => `
+        <article class="card-item">
+          <div class="card-header">
+            <h3>${escapeHtml(card.name)}</h3>
+            <span class="card-color-dot" style="background:${card.color || '#5CA99A'}"></span>
+          </div>
+          <p class="subtitle">${escapeHtml(card.description || '')}</p>
+          <div class="field-list">
+            ${(card.fields || []).map(field => `
+              <div class="field-value">
+                <strong>${escapeHtml(field.key)}</strong>
+                <span>${escapeHtml(field.value)}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="form-actions">
+            <button type="button" class="button small secondary" onclick="editCard('${card.id}')">Modifier</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function editCard(cardId){
+      const calendar = currentCalendar();
+      const card = calendar.cards.find(item => item.id === cardId);
+      if (!card) return;
+      document.getElementById('editingCardId').value = card.id;
+      document.getElementById('cardName').value = card.name;
+      document.getElementById('cardDescription').value = card.description || '';
+      document.getElementById('criteriaContainer').innerHTML = '';
+      (card.fields || []).forEach(field => addCriterion({key: field.key, type: field.type || 'text', value: field.value}));
+      populateCardColors(card.color || '#5CA99A');
+      showView('cards', document.querySelector('[data-view="cards"]'));
+    }
+
+    function saveCard(event){
+      event.preventDefault();
+      const calendar = currentCalendar();
+      const editingId = document.getElementById('editingCardId').value;
+      const name = document.getElementById('cardName').value.trim();
+      if (!name) return;
+
+      const keys = [...document.querySelectorAll('.criterion-key')];
+      const types = [...document.querySelectorAll('.criterion-type')];
+      const values = [...document.querySelectorAll('.criterion-value')];
+      const fields = keys.map((input,index) => ({key: input.value.trim(), type: types[index].value, value: values[index].value.trim()})).filter(field => field.key);
+
+      let card = null;
+      if (editingId) card = calendar.cards.find(item => item.id === editingId);
+      if (!card) {
+        card = {id: uid(), name, description:'', color:'#5CA99A', fields:[]};
+        calendar.cards.push(card);
+      }
+
+      card.name = name;
+      card.description = document.getElementById('cardDescription').value.trim();
+      card.color = document.getElementById('selectedCardColor').value || '#5CA99A';
+      card.fields = fields;
+      saveState();
+      resetCardForm();
+      render();
+      notify('Carte enregistrée');
+    }
+
+    function timeToMinutes(value){
+      if (!value) return 0;
+      if (typeof value === 'number') return value;
+      const [hours, minutes] = String(value).split(':').map(Number);
+      return (hours || 0) * 60 + (minutes || 0);
+    }
+
+    function formatRange(startTime, durationMinutes){
+      const start = timeToMinutes(startTime);
+      const end = start + Number(durationMinutes || 0);
+      const formatTime = mins => {
+        const hours = Math.floor(mins/60);
+        const minutes = mins % 60;
+        return `${hours}h${String(minutes).padStart(2,'0')}`;
+      };
+      return `${formatTime(start)} - ${formatTime(end)}`;
+    }
+
+    function renderBoard(){
+      const board = document.getElementById('calendarBoard');
+      const calendars = state.ui.combinedView ? state.calendars.filter(calendar => state.selectedCalendarIds.includes(calendar.id)) : [currentCalendar()];
+      const total = calendars.reduce((sum, calendar) => sum + ((calendar.planning || []).length + (calendar.events || []).length), 0);
+      document.getElementById('planningStatus').textContent = `${total} activité(s) affichée(s)`;
+
+      const byDay = DAYS.reduce((acc, day) => { acc[day] = []; return acc; }, {});
+      calendars.forEach(calendar => {
+        (calendar.planning || []).forEach(item => {
+          const card = calendar.cards.find(c => c.id === item.cardId);
+          byDay[item.day].push({kind:'planning', calendar, item, card});
+        });
+        (calendar.events || []).forEach(event => {
+          byDay[event.day].push({kind:'event', calendar, item:event});
+        });
+      });
+
+      Object.keys(byDay).forEach(day => {
+        byDay[day].sort((a,b) => {
+          const getValue = entry => entry.kind === 'event' ? timeToMinutes(entry.item.time) : timeToMinutes(entry.item.startTime || '09:00');
+          return getValue(a) - getValue(b);
+        });
+      });
+
+      board.innerHTML = DAYS.map(day => {
+        const items = byDay[day] || [];
+        return `
+          <div class="day-column">
+            <div class="day-header">${day}</div>
+            ${items.length ? items.map(({kind, calendar, item, card}) => {
+              if(kind === 'event'){
+                return `
+                  <div class="entry event-entry" style="background:linear-gradient(135deg,${item.color || '#F29A6A'},#f0a26f)">
+                    <span class="label">Événement</span>
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <small>${escapeHtml(item.description || '')}</small>
+                    <div class="entry-meta">${formatRange(item.time, Number(item.duration || 0))}</div>
+                  </div>
+                `;
+              }
+
+              const displayCard = card || {name:'Activité', color:'#5CA99A'};
+              const duration = value(displayCard, 'Durée');
+              const intensity = value(displayCard, 'Intensité');
+              const calendarName = state.ui.combinedView ? `<div class="combined-label">${escapeHtml(calendar.name)}</div>` : '';
+              const actions = !state.ui.combinedView ? `
+                <div class="entry-actions">
+                  <button type="button" onclick="moveEntry('${calendar.id}','${item.id}',-1)">←</button>
+                  <button type="button" onclick="moveEntry('${calendar.id}','${item.id}',1)">→</button>
+                  <button type="button" onclick="replaceEntry('${calendar.id}','${item.id}')">Nouvelle carte</button>
+                </div>
+              ` : '';
+
+              return `
+                <div class="entry activity-entry" style="background:linear-gradient(135deg,${displayCard.color || '#5CA99A'},#4d938a)">
+                  ${calendarName}
+                  <span class="label">Activité générée</span>
+                  <strong>${escapeHtml(displayCard.name || 'Activité')}</strong>
+                  <small>${escapeHtml(duration ? `${duration} min` : '')} ${intensity ? `• ${escapeHtml(intensity)}` : ''}</small>
+                  ${actions}
+                </div>
+              `;
+            }).join('') : '<div class="empty">Repos</div>'}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function generatePlanning(){
+      const calendar = currentCalendar();
+      if (!calendar) return;
+
+      const selectedDays = [...document.querySelectorAll('#availableDays input:checked')].map(input => input.value);
+      const rawActivityCount = document.getElementById('activityCount').value;
+      const activitiesPerDay = rawActivityCount === 'variable' ? 3 : Number(rawActivityCount || 1);
+      const timeChoice = document.getElementById('dailyTime').value;
+      const customMinutes = Number(document.getElementById('customTime').value || 0);
+      const cards = calendar.cards || [];
+
+      if (!selectedDays.length || !cards.length) {
+        notify('Ajoute au moins un jour et au moins une carte.');
+        return;
+      }
+
+      const generated = [];
+      const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
+
+      selectedDays.forEach(day => {
+        let totalMinutes = 0;
+        let createdForDay = 0;
+
+        for (let index = 0; index < activitiesPerDay; index++) {
+          const card = shuffledCards[(index + createdForDay) % shuffledCards.length];
+          const duration = Number(value(card,'Durée') || 0);
+          let dailyLimit = Number.MAX_SAFE_INTEGER;
+
+          if (timeChoice === 'custom') dailyLimit = customMinutes;
+          else if (timeChoice !== 'auto') dailyLimit = Number(timeChoice);
+
+          if (dailyLimit && totalMinutes + duration > dailyLimit) continue;
+
+          generated.push({id: uid(), cardId: card.id, day, startTime: '09:00', locked:false});
+          totalMinutes += duration;
+          createdForDay++;
+        }
+      });
+
+      if (!generated.length) {
+        notify('Les contraintes de temps sont incompatibles.');
+        return;
+      }
+
+      calendar.planning = generated;
+      calendar.request = document.getElementById('planningRequest').value.trim();
+      saveState();
+      render();
+      notify('Planning généré');
+    }
+
+    function clearPlanning(){
+      const calendar = currentCalendar();
+      if (!calendar) return;
+      calendar.planning = [];
+      saveState();
+      render();
+      notify('Planning effacé');
+    }
+
+    function moveEntry(calendarId, entryId, direction){
+      const calendar = findCalendarById(calendarId);
+      if (!calendar) return;
+      const entry = calendar.planning.find(item => item.id === entryId);
+      if (!entry) return;
+      const index = DAYS.indexOf(entry.day);
+      const nextIndex = Math.max(0, Math.min(DAYS.length - 1, index + direction));
+      entry.day = DAYS[nextIndex];
+      saveState();
+      render();
+    }
+
+    function replaceEntry(calendarId, entryId){
+      const calendar = findCalendarById(calendarId);
+      if (!calendar) return;
+      const entry = calendar.planning.find(item => item.id === entryId);
+      if (!entry) return;
+      const options = calendar.cards.filter(card => card.id !== entry.cardId);
+      if (!options.length) {
+        notify('Aucune autre carte disponible');
+        return;
+      }
+      entry.cardId = options[Math.floor(Math.random() * options.length)].id;
+      saveState();
+      render();
+      notify('Nouvelle carte proposée');
+    }
+
+    function renderSettings(){
+      const nameInput = document.getElementById('calendarName');
+      if (nameInput) nameInput.value = currentCalendar() ? currentCalendar().name : '';
+    }
+
+    function createCalendar(){
+      const name = prompt('Nom du nouveau calendrier :');
+      if (!name || !name.trim()) return;
+
+      const newCalendar = {
+        id: uid(),
+        name: name.trim(),
+        cards: [],
+        planning: [],
+        events: [],
+        request: ''
+      };
+
+      state.calendars.push(newCalendar);
+      state.currentCalendarId = newCalendar.id;
+      if (!state.selectedCalendarIds.includes(newCalendar.id)) state.selectedCalendarIds.push(newCalendar.id);
+      state.ui.combinedView = false;
+      saveState();
+      render();
+      showView('planning', document.querySelector('[data-view="planning"]'));
+      notify(`Calendrier « ${newCalendar.name} » créé`);
+    }
+
+    function renameCalendar(){
+      const calendar = currentCalendar();
+      if (!calendar) return;
+      const nextName = document.getElementById('calendarName').value.trim();
+      if (!nextName) return;
+      calendar.name = nextName;
+      saveState();
+      render();
+      notify('Calendrier renommé');
+    }
+
+    function duplicateCalendar(){
+      const calendar = currentCalendar();
+      if (!calendar) return;
+      const clone = JSON.parse(JSON.stringify(calendar));
+      clone.id = uid();
+      clone.name = `${calendar.name} - Copie`;
+      clone.cards = clone.cards.map(card => ({...card, id: uid()}));
+      clone.planning = [];
+      clone.events = [];
+      state.calendars.push(clone);
+      state.currentCalendarId = clone.id;
+      state.selectedCalendarIds = [...new Set([...state.selectedCalendarIds, clone.id])];
+      saveState();
+      render();
+      notify('Calendrier dupliqué');
+    }
+
+    function deleteCalendar(){
+      if (state.calendars.length <= 1) {
+        notify('Conservez au moins un calendrier.');
+        return;
+      }
+      if (!confirm('Supprimer ce calendrier ?')) return;
+      state.calendars = state.calendars.filter(calendar => calendar.id !== state.currentCalendarId);
+      state.selectedCalendarIds = state.selectedCalendarIds.filter(id => id !== state.currentCalendarId);
+      if (!state.selectedCalendarIds.length) state.selectedCalendarIds = [state.calendars[0].id];
+      state.currentCalendarId = state.selectedCalendarIds[0];
+      saveState();
+      render();
+      notify('Calendrier supprimé');
+    }
+
+    function resetApplication(){
+      if (!confirm('Réinitialiser toutes les données ?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      state = buildInitialState();
+      saveState();
+      render();
+      notify('Application réinitialisée');
+    }
+
+    function openEventModal(){
+      const modal = document.getElementById('eventModal');
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden','false');
+    }
+
+    function closeEventModal(){
+      const modal = document.getElementById('eventModal');
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden','true');
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDescription').value = '';
+      document.getElementById('eventDuration').value = 60;
+    }
+
+    function saveEvent(event){
+      event.preventDefault();
+      const calendar = currentCalendar();
+      const title = document.getElementById('eventTitle').value.trim();
+      const description = document.getElementById('eventDescription').value.trim();
+      const day = document.getElementById('eventDay').value;
+      const time = document.getElementById('eventTime').value;
+      const duration = Number(document.getElementById('eventDuration').value || 0);
+      const color = document.getElementById('eventColor').value;
+
+      if (!title || !day || !time || !duration) return;
+      calendar.events.push({id: uid(), title, description, day, time, duration, color});
+      saveState();
+      closeEventModal();
+      render();
+      notify('Événement ajouté');
+    }
+
+    const tutorialSteps = [
+      {title:'Bienvenue sur active day !', subtitle:'active day', text:'Crée tes calendriers, imagine tes activités et laisse active day construire ton planning selon tes envies.'},
+      {title:'1. Crée ton calendrier', subtitle:'Créer', text:'Commence par créer un calendrier pour organiser un thème ou une période précise.'},
+      {title:'2. Crée tes cartes', subtitle:'Cartes', text:'Crée tes propres cartes et choisis les critères que tu souhaites personnaliser.'},
+      {title:'3. Écris ta requête', subtitle:'Requête', text:'Explique librement ce que tu souhaites obtenir dans ton planning.'},
+      {title:'4. Génère ton planning', subtitle:'Génération', text:'L’application utilise tes cartes et ta requête pour construire le planning.'},
+      {title:'5. Modifie ton planning', subtitle:'Personnalisation', text:'Tu peux déplacer, remplacer ou régénérer les activités selon tes besoins.'}
+    ];
+
+    let tutorialIndex = 0;
+
+    function renderTutorialProgress(){
+      const progress = document.getElementById('tutorialProgress');
+      progress.innerHTML = tutorialSteps.map((_, index) => `
+        <span class="dot ${index === tutorialIndex ? 'active' : ''}"></span>
+      `).join('');
+    }
+
+    function openTutorial(forceOpen = false){
+      if (!forceOpen && state.settings.tutorialCompleted) return;
+      tutorialIndex = 0;
+      renderTutorialStep();
+      document.getElementById('tutorialModal').classList.remove('hidden');
+      document.getElementById('tutorialModal').setAttribute('aria-hidden','false');
+    }
+
+    function closeTutorial(){
+      state.settings.tutorialCompleted = true;
+      saveState();
+      document.getElementById('tutorialModal').classList.add('hidden');
+      document.getElementById('tutorialModal').setAttribute('aria-hidden','true');
+    }
+
+    function renderTutorialStep(){
+      const step = tutorialSteps[tutorialIndex];
+      const titleEl = document.getElementById('tutorialTitle');
+      const stepTitleEl = document.getElementById('tutorialStepTitle');
+      const textEl = document.getElementById('tutorialText');
+      const prevBtn = document.getElementById('tutorialPrev');
+      const nextBtn = document.getElementById('tutorialNext');
+      const skipBtn = document.getElementById('tutorialSkip');
+
+      titleEl.textContent = step.title;
+      stepTitleEl.textContent = step.subtitle;
+      textEl.textContent = step.text;
+      renderTutorialProgress();
+
+      prevBtn.style.display = tutorialIndex === 0 ? 'none' : 'inline-flex';
+      skipBtn.style.display = tutorialIndex === tutorialSteps.length - 1 ? 'none' : 'inline-flex';
+      nextBtn.textContent = tutorialIndex === tutorialSteps.length - 1 ? 'Commencer' : 'Suivant';
+    }
+
+    function changeTutorialStep(direction){
+      tutorialIndex += direction;
+      if (tutorialIndex < 0) tutorialIndex = 0;
+      if (tutorialIndex >= tutorialSteps.length) {
+        closeTutorial();
+        return;
+      }
+      renderTutorialStep();
+    }
+
+    function showSelectedCalendars(){
+      document.getElementById('generator').style.display = 'none';
+      document.getElementById('planningTitle').textContent = 'Calendriers sélectionnés';
+      state.ui.combinedView = true;
+      renderBoard();
+      notify('Vue combinée affichée');
+    }
+
+    function showSingleCalendar(){
+      document.getElementById('generator').style.display = 'block';
+      document.getElementById('planningTitle').textContent = 'Planning de la semaine';
+      state.ui.combinedView = false;
+      renderBoard();
+      notify('Calendrier actif affiché');
+    }
+
+    function render(){
+      applyTheme();
+      renderMenu();
+      renderSelection();
+      renderDays();
+      renderCards();
+      renderBoard();
+      renderSettings();
+      populateCardColors(document.getElementById('selectedCardColor')?.value || '#5CA99A');
+      generateTimeOptions();
+      document.getElementById('pageTitle').textContent = currentCalendar() ? currentCalendar().name : 'active day';
+      const requestBox = document.getElementById('planningRequest');
+      if (requestBox && !requestBox.matches(':focus')) requestBox.value = currentCalendar() ? currentCalendar().request || '' : '';
+      if (!state.settings.tutorialCompleted) openTutorial(true);
+    }
+
+    function generateTimeOptions(){
+      const select = document.getElementById('eventColor');
+      if (!select) return;
+      select.innerHTML = EVENT_COLORS.map(([name, color]) => `<option value="${color}">${name}</option>`).join('');
+      select.value = '#F29A6A';
+    }
+
+    function initialize(){
+      resetCardForm();
+      render();
+      showView('home', document.querySelector('[data-view="home"]'));
+      if (!state.settings.tutorialCompleted) openTutorial(true);
+    }
+
+    document.addEventListener('DOMContentLoaded', initialize);
+    window.addEventListener('beforeunload', saveState);
+  </script>
+</body>
+</html>
